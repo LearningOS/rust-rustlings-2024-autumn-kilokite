@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+//K I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,9 +37,35 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.bubble_up(self.count);
+    }
+    fn bubble_up(&mut self, idx: usize) {
+        let mut child_idx = idx;
+        while child_idx > 1 {
+            let parent_idx = self.parent_idx(child_idx);
+            if (self.comparator)(&self.items[child_idx], &self.items[parent_idx]) {
+                self.items.swap(child_idx, parent_idx);
+                child_idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
+    fn bubble_down(&mut self, idx: usize) {
+        let mut parent_idx = idx;
+        while self.children_present(parent_idx) {
+            let smaller_child_idx = self.smallest_child_idx(parent_idx);
+            if (self.comparator)(&self.items[smaller_child_idx], &self.items[parent_idx]) {
+                self.items.swap(smaller_child_idx, parent_idx);
+                parent_idx = smaller_child_idx;
+            } else {
+                break;
+            }
+        }
+    }
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
     }
@@ -57,8 +83,14 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        if self.right_child_idx(idx) > self.count {
+            return self.left_child_idx(idx);
+        }
+        if (self.comparator)(&self.items[self.left_child_idx(idx)], &self.items[self.right_child_idx(idx)]) {
+            self.left_child_idx(idx)
+        } else {
+            self.right_child_idx(idx)
+        }
     }
 }
 
@@ -84,8 +116,15 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        // Swap the top element with the last and remove the last element
+        self.items.swap(1, self.count);
+        self.count -= 1;
+        let top = self.items.pop().unwrap(); // Safe to unwrap since count > 0
+        self.bubble_down(1); // Re-heapify
+        Some(top)
     }
 }
 
